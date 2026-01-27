@@ -1,44 +1,39 @@
 <?php
 
-// Controlador de autenticacion: registro, login y datos del usuario actual.
+declare(strict_types=1);
 
-class AuthController
+namespace App\Controllers;
+
+use App\Support\Auth;
+use App\Support\Response;
+use PDO;
+
+/**
+ * Controlador de autenticacion: registro, login, logout y datos del usuario actual.
+ */
+final class AuthController
 {
-    private PDO $pdo;
+    private const MAX_NAME_LENGTH = 100;
+    private const MIN_PASSWORD_LENGTH = 6;
 
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
+    public function __construct(
+        private readonly PDO $pdo
+    ) {}
 
-    public function register(array $data): void
+    /**
+     * Registra un nuevo usuario.
+     *
+     * @param array<string, mixed> $data Datos del formulario (name, email, password)
+     */
+    public function register(array $data): never
     {
-        // Datos que llegan en JSON desde el cliente.
         $name = trim($data['name'] ?? '');
         $email = strtolower(trim($data['email'] ?? ''));
         $password = $data['password'] ?? '';
 
-        if ($name === '' || $email === '' || $password === '') {
-            json_error('Nombre, email y contraseña son obligatorios.', 422);
-        }
-        if (mb_strlen($name) > 100) {
-            json_error('El nombre no puede superar 100 caracteres.', 422);
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            json_error('El email no es valido.', 422);
-        }
-        if (mb_strlen($password) < 6) {
-            json_error('La contraseña debe tener al menos 6 caracteres.', 422);
-        }
+        $this->validateRegistration($name, $email, $password);
+        $this->checkEmailExists($email);
 
-        // Consulta preparada para evitar inyeccion SQL.
-        $stmt = $this->pdo->prepare('SELECT id FROM users WHERE email = :email');
-        $stmt->execute(['email' => $email]);
-        if ($stmt->fetch()) {
-            json_error('El email ya está registrado.', 409);
-        }
-
-        // Hash seguro de la contrasena.
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $this->pdo->prepare(
             'INSERT INTO users (name, email, password) VALUES (:name, :email, :password) RETURNING id'
@@ -49,62 +44,102 @@ class AuthController
             'password' => $hash,
         ]);
 
-        $userId = (int)$stmt->fetchColumn();
-        // Se guarda el usuario en la sesion PHP.
-        $_SESSION['user'] = [
-            'id' => $userId,
-            'name' => $name,
-            'email' => $email,
-        ];
+        $userId = (int) $stmt->fetchColumn();
+        $user = ['id' => $userId, 'name' => $name, 'email' => $email];
 
-        json_response(['message' => 'Registro completado.', 'user' => $_SESSION['user']], 201);
+        Auth::setUser($user);
+        Response::json(['message' => 'Registro completado.', 'user' => $user], 201);
     }
 
-    public function login(array $data): void
+    /**
+     * Inicia sesion de un usuario existente.
+     *
+     * @param array<string, mixed> $data Datos del formulario (email, password)
+     */
+    public function login(array $data): never
     {
-        // Datos enviados por el cliente en el cuerpo JSON.
         $email = strtolower(trim($data['email'] ?? ''));
         $password = $data['password'] ?? '';
 
-        if ($email === '' || $password === '') {
-            json_error('Email y contraseña son obligatorios.', 422);
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            json_error('El email no es valido.', 422);
-        }
+        $this->validateLogin($email, $password);
 
-        // Buscamos el usuario por email.
         $stmt = $this->pdo->prepare('SELECT id, name, email, password FROM users WHERE email = :email');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
 
-        // Comprobamos el hash almacenado.
         if (!$user || !password_verify($password, $user['password'])) {
-            json_error('Credenciales inválidas.', 401);
+            Response::error('Credenciales invalidas.', 401);
         }
 
-        // Si todo va bien, guardamos la sesion.
-        $_SESSION['user'] = [
-            'id' => (int)$user['id'],
+        $userData = [
+            'id' => (int) $user['id'],
             'name' => $user['name'],
             'email' => $user['email'],
         ];
 
-        json_response(['message' => 'Login correcto.', 'user' => $_SESSION['user']]);
+        Auth::setUser($userData);
+        Response::json(['message' => 'Login correcto.', 'user' => $userData]);
     }
 
-    public function logout(): void
+    /**
+     * Cierra la sesion del usuario actual.
+     */
+    public function logout(): never
     {
-        // Limpiamos la sesion del usuario.
-        $_SESSION = [];
-        session_destroy();
-        json_response(['message' => 'Sesión cerrada.']);
+        Auth::logout();
+        Response::json(['message' => 'Sesion cerrada.']);
     }
 
-    public function me(): void
+    /**
+     * Devuelve los datos del usuario autenticado.
+     */
+    public function me(): never
     {
-        // Devuelve los datos del usuario autenticado.
-        $user = require_auth();
-        json_response(['user' => $user]);
+        $user = Auth::requireAuth();
+        Response::json(['user' => $user]);
+    }
+
+    /**
+     * Valida los datos de registro.
+     */
+    private function validateRegistration(string $name, string $email, string $password): void
+    {
+        if ($name === '' || $email === '' || $password === '') {
+            Response::error('Nombre, email y contrasena son obligatorios.', 422);
+        }
+        if (mb_strlen($name) > self::MAX_NAME_LENGTH) {
+            Response::error('El nombre no puede superar ' . self::MAX_NAME_LENGTH . ' caracteres.', 422);
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Response::error('El email no es valido.', 422);
+        }
+        if (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) {
+            Response::error('La contrasena debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.', 422);
+        }
+    }
+
+    /**
+     * Valida los datos de login.
+     */
+    private function validateLogin(string $email, string $password): void
+    {
+        if ($email === '' || $password === '') {
+            Response::error('Email y contrasena son obligatorios.', 422);
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Response::error('El email no es valido.', 422);
+        }
+    }
+
+    /**
+     * Verifica si el email ya esta registrado.
+     */
+    private function checkEmailExists(string $email): void
+    {
+        $stmt = $this->pdo->prepare('SELECT id FROM users WHERE email = :email');
+        $stmt->execute(['email' => $email]);
+        if ($stmt->fetch()) {
+            Response::error('El email ya esta registrado.', 409);
+        }
     }
 }
