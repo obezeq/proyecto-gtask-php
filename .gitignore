@@ -5,3 +5,14 @@
 # OS
 .DS_Store
 .claude
+
+# Composer
+/app/vendor/
+/app/composer.lock
+
+# PHPUnit
+/app/.phpunit.cache/
+/app/coverage/
+
+# Logs
+*.log
