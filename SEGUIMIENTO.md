@@ -24,3 +24,17 @@
 - 2026-01-26: Documenté los pasos completos en `PASOS_DESARROLLO.md`.
 - 2026-01-26: Añadí checklist de entrega en `CHECKLIST_ENTREGA.md`.
 - 2026-01-26: Añadí manual de usuario (`MANUAL_USUARIO.md`) y manual de despliegue (`MANUAL_DESPLIEGUE.md`).
+
+- 2026-01-28: Configuré Composer con autoloading PSR-4 para `App\` y `Tests\`.
+- 2026-01-28: Refactoricé `Support.php` en clases separadas con namespaces: `App\Support\Response`, `App\Support\Request`, `App\Support\Auth`, `App\Support\Cors`.
+- 2026-01-28: Refactoricé `Database.php` a `App\Database\Connection` con namespace PSR-4.
+- 2026-01-28: Agregué namespaces a Controllers (`App\Controllers\AuthController`, `App\Controllers\TaskController`).
+- 2026-01-28: Actualicé `index.php` con autoloading de Composer y match expressions para routing.
+- 2026-01-28: Configuré PHPUnit 11 con `phpunit.xml` y estructura de tests.
+- 2026-01-28: Implementé 28 tests unitarios para validaciones de auth y tareas.
+- 2026-01-28: Implementé 18 tests de integración para API de auth y tareas.
+- 2026-01-28: Total: 46 tests, 118 assertions - todos pasan.
+- 2026-01-28: Cambié a `network_mode: host` en Docker para resolver problemas de red entre contenedores.
+- 2026-01-28: Actualicé `nginx.conf` para usar `127.0.0.1:9000` en lugar de `php:9000`.
+- 2026-01-28: Creé `run-tests.sh` y `docker-compose.test.yml` para ejecutar tests en Docker.
+- 2026-01-28: Verificación completa: API, tests, Docker, cliente web - todo funcionando al 100%.
