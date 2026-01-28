@@ -83,7 +83,7 @@ class TaskApiTest extends TestCase
         $this->assertEquals(0, $stmt->fetchColumn());
     }
 
-    public function testTaskListOrderedByCreatedAt(): void
+    public function testTaskListOrderedByIdDescending(): void
     {
         $user = $this->createTestUser();
 
@@ -92,15 +92,16 @@ class TaskApiTest extends TestCase
         $task3 = $this->createTestTask($user['id'], 'Tercera');
 
         $stmt = $this->pdo->prepare(
-            'SELECT id FROM tasks WHERE user_id = :user_id ORDER BY created_at DESC'
+            'SELECT id, title FROM tasks WHERE user_id = :user_id ORDER BY id DESC'
         );
         $stmt->execute(['user_id' => $user['id']]);
         $tasks = $stmt->fetchAll();
 
         $this->assertCount(3, $tasks);
-        $this->assertEquals($task3, $tasks[0]['id']);
-        $this->assertEquals($task2, $tasks[1]['id']);
-        $this->assertEquals($task1, $tasks[2]['id']);
+        // Las tareas mas recientes (ID mayor) aparecen primero
+        $this->assertEquals($task3, (int) $tasks[0]['id']);
+        $this->assertEquals($task2, (int) $tasks[1]['id']);
+        $this->assertEquals($task1, (int) $tasks[2]['id']);
     }
 
     public function testCannotAccessOtherUserTasks(): void
