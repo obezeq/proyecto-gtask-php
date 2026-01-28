@@ -81,7 +81,11 @@ curl http://localhost/api/tasks -b cookies.txt
 Ejecutar tests con PHPUnit:
 
 ```bash
+# Linux/Mac
 ./run-tests.sh
+
+# Windows
+run-tests.bat
 ```
 
 O directamente:
