@@ -1,7 +1,6 @@
 # Estructura del proyecto GTask
 
 Proyecto de API REST con PHP 8.4 y PostgreSQL 17, dockerizado.
-Uso PSR-4 con Composer para organizar el codigo con namespaces.
 Hay un cliente web basico y tests con PHPUnit.
 
 ## Raiz del proyecto
@@ -15,20 +14,15 @@ Hay un cliente web basico y tests con PHPUnit.
 ## Carpeta app/
 
 ### app/public/
-- index.php: punto de entrada. Usa autoloading PSR-4 y match expressions para routing.
+- index.php: punto de entrada. Incluye los archivos necesarios y usa match expressions para routing.
 - views/app.php: HTML del cliente web.
 - assets/style.css: estilos minimos para que sea usable.
 - assets/app.js: logica del cliente (fetch a /api con cookies de sesion).
 
-### app/src/ (Namespace: App\)
-- Support/ (Namespace: App\Support)
-  - Response.php: respuestas JSON con metodos json() y error().
-  - Request.php: lectura del cuerpo JSON de la peticion.
-  - Auth.php: gestion de sesion (login, logout, verificacion).
-  - Cors.php: cabeceras CORS y manejo de OPTIONS.
-- Database/ (Namespace: App\Database)
-  - Connection.php: conexion PDO a PostgreSQL con patron singleton.
-- Controllers/ (Namespace: App\Controllers)
+### app/src/
+- Support.php: funciones de utilidad (json_response, json_error, get_json_body, sesion, CORS).
+- Database.php: clase Database para la conexion PDO a PostgreSQL.
+- Controllers/
   - AuthController.php: registro, login, logout, /api/me.
   - TaskController.php: CRUD de tareas con validaciones.
 
@@ -46,7 +40,7 @@ Hay un cliente web basico y tests con PHPUnit.
   - TaskApiTest.php: tests de integracion de tareas.
 
 ### app/composer.json
-Configura autoloading PSR-4 y PHPUnit 11.
+Configura autoloading para tests y PHPUnit 11.
 
 ### app/phpunit.xml
 Configuracion de PHPUnit con suites Unit y Feature.
@@ -55,18 +49,18 @@ Configuracion de PHPUnit con suites Unit y Feature.
 1) Nginx recibe la peticion.
 2) Si es un archivo estatico (assets), lo sirve directamente.
 3) Si no, reenvia a app/public/index.php.
-4) index.php carga el autoloader de Composer y usa match expressions para routing.
+4) index.php incluye Support.php, Database.php y los controladores, luego usa match expressions para routing.
 5) Los controladores usan PDO (inyectado) para consultar la base de datos.
 6) Las respuestas son JSON (o la vista HTML en /).
 
 ## Conexion a la base de datos
 - Los parametros se obtienen desde variables de entorno del contenedor.
 - Si no existen, se usan valores por defecto (host 127.0.0.1, puerto 5432, etc.).
-- App\Database\Connection construye el DSN y crea el objeto PDO.
+- La clase Database construye el DSN y crea el objeto PDO.
 
 ## Donde llegan los datos del cliente
 - En la API, el cliente envia JSON en el cuerpo de la peticion.
-- App\Support\Request::json() lee `php://input` y lo convierte a array.
+- La funcion get_json_body() en Support.php lee `php://input` y lo convierte a array.
 - Los controladores leen esos campos y los validan antes de ejecutar SQL.
 
 ## Tests

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Database\Connection;
 use PDO;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
+// Incluir los archivos necesarios
+require_once __DIR__ . '/../../src/Support.php';
+require_once __DIR__ . '/../../src/Database.php';
+
 /**
- * Clase base para tests de integracion con base de datos.
- * Usa transacciones para mantener la BD limpia entre tests.
+ * Clase base para tests de integracion.
  */
 abstract class TestCase extends BaseTestCase
 {
@@ -21,48 +23,27 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $config = [
-            'host' => getenv('DB_HOST') ?: 'db',
+            'host' => getenv('DB_HOST') ?: '127.0.0.1',
             'port' => getenv('DB_PORT') ?: '5432',
             'name' => getenv('DB_NAME') ?: 'app_test',
             'user' => getenv('DB_USER') ?: 'user',
             'password' => getenv('DB_PASSWORD') ?: 'password',
         ];
 
-        $connection = new Connection($config);
-        $this->pdo = $connection->pdo();
+        $database = new \Database($config);
+        $this->pdo = $database->getConnection();
 
-        $this->beginTransaction();
+        $this->pdo->beginTransaction();
     }
 
     protected function tearDown(): void
     {
-        $this->rollbackTransaction();
-        parent::tearDown();
-    }
-
-    /**
-     * Inicia una transaccion para aislar los cambios del test.
-     */
-    protected function beginTransaction(): void
-    {
-        $this->pdo->beginTransaction();
-    }
-
-    /**
-     * Revierte la transaccion para limpiar los cambios.
-     */
-    protected function rollbackTransaction(): void
-    {
         if ($this->pdo->inTransaction()) {
             $this->pdo->rollBack();
         }
+        parent::tearDown();
     }
 
-    /**
-     * Crea un usuario de prueba en la BD.
-     *
-     * @return array<string, mixed> Datos del usuario creado
-     */
     protected function createTestUser(string $email = 'test@example.com', string $name = 'Test User'): array
     {
         $stmt = $this->pdo->prepare(
@@ -81,11 +62,6 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    /**
-     * Crea una tarea de prueba en la BD.
-     *
-     * @return int ID de la tarea creada
-     */
     protected function createTestTask(
         int $userId,
         string $title = 'Test Task',

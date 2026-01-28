@@ -18,11 +18,7 @@
 - [x] Levantar Docker y probar endpoints `/api` (registro/login/tareas).
 
 ## Mejoras (28 enero)
-- [x] Composer PSR-4
-- [x] Support.php separado en clases
-- [x] Database.php con namespace
-- [x] Namespaces en controllers
-- [x] Router con match
+- [x] Router con match expressions
 - [x] PHPUnit
 - [x] Tests unitarios
 - [x] Tests integracion

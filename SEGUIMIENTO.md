@@ -25,11 +25,8 @@
 - 2026-01-26: Añadí checklist de entrega en `CHECKLIST_ENTREGA.md`.
 - 2026-01-26: Añadí manual de usuario (`MANUAL_USUARIO.md`) y manual de despliegue (`MANUAL_DESPLIEGUE.md`).
 
-- 2026-01-28: Volví al proyecto, queria dejarlo mejor estructurado. Configuré composer para PSR-4
-- 2026-01-28: He separado Support.php en varias clases con namespaces, queda mas limpio asi
-- 2026-01-28: Lo mismo con Database.php -> App\Database\Connection
-- 2026-01-28: Namespaces tambien a los controllers
-- 2026-01-28: He tenido que tocar index.php para el autoloader. He puesto match en vez de tantos if
+- 2026-01-28: Volví al proyecto, queria dejarlo mejor estructurado
+- 2026-01-28: He puesto match expressions en el router en vez de tantos if, queda mas limpio
 - 2026-01-28: PHPUnit instalado, me ha costado un rato hasta que ha funcionado bien
 - 2026-01-28: Tests unitarios hechos, 28 en total para validaciones y eso
 - 2026-01-28: Tests de integracion tambien, otros 18. Asi pruebo toda la API

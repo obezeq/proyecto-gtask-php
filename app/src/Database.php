@@ -2,21 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Database;
-
-use PDO;
-use PDOException;
-
 /**
- * Clase de conexion a PostgreSQL usando PDO.
+ * Clase de conexion a la base de datos PostgreSQL.
  */
-final class Connection
+class Database
 {
     private PDO $pdo;
 
     /**
-     * @param array<string, string> $config Configuracion de conexion (host, port, name, user, password)
-     * @throws PDOException Si falla la conexion
+     * Crea la conexion PDO usando la configuracion proporcionada.
      */
     public function __construct(array $config)
     {
@@ -39,14 +33,14 @@ final class Connection
                 ]
             );
         } catch (PDOException $e) {
-            throw new PDOException('Error de conexion a la base de datos: ' . $e->getMessage());
+            throw new PDOException('Error de conexion: ' . $e->getMessage());
         }
     }
 
     /**
-     * Devuelve la instancia PDO para ejecutar consultas.
+     * Devuelve la instancia PDO.
      */
-    public function pdo(): PDO
+    public function getConnection(): PDO
     {
         return $this->pdo;
     }

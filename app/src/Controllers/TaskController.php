@@ -2,16 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
-
-use App\Support\Response;
-use DateTimeImmutable;
-use PDO;
-
 /**
- * Controlador de tareas: CRUD (listar, ver, crear, actualizar, eliminar).
+ * Controlador de tareas: CRUD completo.
  */
-final class TaskController
+class TaskController
 {
     private const VALID_STATUSES = ['pending', 'completed'];
     private const MAX_TITLE_LENGTH = 200;
@@ -19,9 +13,12 @@ final class TaskController
     private const MIN_PRIORITY = 0;
     private const MAX_PRIORITY = 5;
 
-    public function __construct(
-        private readonly PDO $pdo
-    ) {}
+    private PDO $pdo;
+
+    public function __construct(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
 
     /**
      * Lista todas las tareas del usuario.
@@ -33,22 +30,20 @@ final class TaskController
              FROM tasks WHERE user_id = :user_id ORDER BY created_at DESC'
         );
         $stmt->execute(['user_id' => $userId]);
-        Response::json(['tasks' => $stmt->fetchAll()]);
+        json_response(['tasks' => $stmt->fetchAll()]);
     }
 
     /**
-     * Muestra una tarea especifica.
+     * Muestra una tarea.
      */
     public function show(int $userId, int $taskId): never
     {
         $task = $this->findTask($userId, $taskId);
-        Response::json(['task' => $task]);
+        json_response(['task' => $task]);
     }
 
     /**
      * Crea una nueva tarea.
-     *
-     * @param array<string, mixed> $data Datos de la tarea
      */
     public function create(int $userId, array $data): never
     {
@@ -84,9 +79,7 @@ final class TaskController
     }
 
     /**
-     * Actualiza una tarea existente (actualizacion parcial).
-     *
-     * @param array<string, mixed> $data Campos a actualizar
+     * Actualiza una tarea (parcial).
      */
     public function update(int $userId, int $taskId, array $data): never
     {
@@ -96,7 +89,7 @@ final class TaskController
         $this->processUpdateFields($data, $fields, $params);
 
         if (empty($fields)) {
-            Response::error('No hay campos para actualizar.', 422);
+            json_error('No hay campos para actualizar.', 422);
         }
 
         $fields[] = 'updated_at = NOW()';
@@ -105,7 +98,7 @@ final class TaskController
         $stmt->execute($params);
 
         if ($stmt->rowCount() === 0) {
-            Response::error('Tarea no encontrada.', 404);
+            json_error('Tarea no encontrada.', 404);
         }
 
         $this->show($userId, $taskId);
@@ -120,17 +113,12 @@ final class TaskController
         $stmt->execute(['id' => $taskId, 'user_id' => $userId]);
 
         if ($stmt->rowCount() === 0) {
-            Response::error('Tarea no encontrada.', 404);
+            json_error('Tarea no encontrada.', 404);
         }
 
-        Response::json(['message' => 'Tarea eliminada.']);
+        json_response(['message' => 'Tarea eliminada.']);
     }
 
-    /**
-     * Busca una tarea por ID y usuario.
-     *
-     * @return array<string, mixed>
-     */
     private function findTask(int $userId, int $taskId): array
     {
         $stmt = $this->pdo->prepare(
@@ -141,15 +129,12 @@ final class TaskController
         $task = $stmt->fetch();
 
         if (!$task) {
-            Response::error('Tarea no encontrada.', 404);
+            json_error('Tarea no encontrada.', 404);
         }
 
         return $task;
     }
 
-    /**
-     * Valida los datos de una tarea.
-     */
     private function validateTaskData(
         string $title,
         ?string $description,
@@ -158,41 +143,34 @@ final class TaskController
         int $priority
     ): void {
         if ($title === '') {
-            Response::error('El titulo es obligatorio.', 422);
+            json_error('El titulo es obligatorio.', 422);
         }
         if (mb_strlen($title) > self::MAX_TITLE_LENGTH) {
-            Response::error('El titulo no puede superar ' . self::MAX_TITLE_LENGTH . ' caracteres.', 422);
+            json_error('El titulo no puede superar ' . self::MAX_TITLE_LENGTH . ' caracteres.', 422);
         }
         if ($description !== null && mb_strlen($description) > self::MAX_DESCRIPTION_LENGTH) {
-            Response::error('La descripcion no puede superar ' . self::MAX_DESCRIPTION_LENGTH . ' caracteres.', 422);
+            json_error('La descripcion no puede superar ' . self::MAX_DESCRIPTION_LENGTH . ' caracteres.', 422);
         }
         if (!in_array($status, self::VALID_STATUSES, true)) {
-            Response::error('El estado no es valido.', 422);
+            json_error('El estado no es valido.', 422);
         }
         if ($priority < self::MIN_PRIORITY || $priority > self::MAX_PRIORITY) {
-            Response::error('La prioridad debe estar entre ' . self::MIN_PRIORITY . ' y ' . self::MAX_PRIORITY . '.', 422);
+            json_error('La prioridad debe estar entre ' . self::MIN_PRIORITY . ' y ' . self::MAX_PRIORITY . '.', 422);
         }
         if ($dueDate !== null && !$this->isValidDate($dueDate)) {
-            Response::error('La fecha limite debe tener formato YYYY-MM-DD.', 422);
+            json_error('La fecha limite debe tener formato YYYY-MM-DD.', 422);
         }
     }
 
-    /**
-     * Procesa los campos a actualizar y construye la consulta dinamica.
-     *
-     * @param array<string, mixed> $data Datos recibidos
-     * @param array<int, string> $fields Clausulas SET (por referencia)
-     * @param array<string, mixed> $params Parametros de la consulta (por referencia)
-     */
     private function processUpdateFields(array $data, array &$fields, array &$params): void
     {
         if (array_key_exists('title', $data)) {
             $title = trim((string) $data['title']);
             if ($title === '') {
-                Response::error('El titulo no puede estar vacio.', 422);
+                json_error('El titulo no puede estar vacio.', 422);
             }
             if (mb_strlen($title) > self::MAX_TITLE_LENGTH) {
-                Response::error('El titulo no puede superar ' . self::MAX_TITLE_LENGTH . ' caracteres.', 422);
+                json_error('El titulo no puede superar ' . self::MAX_TITLE_LENGTH . ' caracteres.', 422);
             }
             $fields[] = 'title = :title';
             $params['title'] = $title;
@@ -200,7 +178,7 @@ final class TaskController
 
         if (array_key_exists('description', $data)) {
             if ($data['description'] !== null && mb_strlen((string) $data['description']) > self::MAX_DESCRIPTION_LENGTH) {
-                Response::error('La descripcion no puede superar ' . self::MAX_DESCRIPTION_LENGTH . ' caracteres.', 422);
+                json_error('La descripcion no puede superar ' . self::MAX_DESCRIPTION_LENGTH . ' caracteres.', 422);
             }
             $fields[] = 'description = :description';
             $params['description'] = $data['description'];
@@ -209,7 +187,7 @@ final class TaskController
         if (array_key_exists('status', $data)) {
             $status = strtolower(trim((string) $data['status']));
             if (!in_array($status, self::VALID_STATUSES, true)) {
-                Response::error('El estado no es valido.', 422);
+                json_error('El estado no es valido.', 422);
             }
             $fields[] = 'status = :status';
             $params['status'] = $status;
@@ -223,7 +201,7 @@ final class TaskController
 
         if (array_key_exists('due_date', $data)) {
             if ($data['due_date'] !== null && !$this->isValidDate($data['due_date'])) {
-                Response::error('La fecha limite debe tener formato YYYY-MM-DD.', 422);
+                json_error('La fecha limite debe tener formato YYYY-MM-DD.', 422);
             }
             $fields[] = 'due_date = :due_date';
             $params['due_date'] = $data['due_date'];
@@ -232,16 +210,13 @@ final class TaskController
         if (array_key_exists('priority', $data)) {
             $priority = (int) $data['priority'];
             if ($priority < self::MIN_PRIORITY || $priority > self::MAX_PRIORITY) {
-                Response::error('La prioridad debe estar entre ' . self::MIN_PRIORITY . ' y ' . self::MAX_PRIORITY . '.', 422);
+                json_error('La prioridad debe estar entre ' . self::MIN_PRIORITY . ' y ' . self::MAX_PRIORITY . '.', 422);
             }
             $fields[] = 'priority = :priority';
             $params['priority'] = $priority;
         }
     }
 
-    /**
-     * Valida que una fecha tenga formato YYYY-MM-DD y sea valida.
-     */
     private function isValidDate(string $date): bool
     {
         $dt = DateTimeImmutable::createFromFormat('Y-m-d', $date);
