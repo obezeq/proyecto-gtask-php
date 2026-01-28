@@ -25,16 +25,15 @@
 - 2026-01-26: Añadí checklist de entrega en `CHECKLIST_ENTREGA.md`.
 - 2026-01-26: Añadí manual de usuario (`MANUAL_USUARIO.md`) y manual de despliegue (`MANUAL_DESPLIEGUE.md`).
 
-- 2026-01-28: Retomé el proyecto. Quería mejorar la estructura asi que configuré Composer con autoloading PSR-4.
-- 2026-01-28: Separé el archivo `Support.php` en varias clases, cada una con su namespace. Quedó mucho mas organizado.
-- 2026-01-28: Hice lo mismo con `Database.php`, ahora está en `App\Database\Connection`.
-- 2026-01-28: Añadí namespaces a los controllers para que todo siga el mismo patron.
-- 2026-01-28: Tuve que actualizar el `index.php` para que use el autoloader de Composer. Aproveché para usar match en vez de if/else.
-- 2026-01-28: Instalé PHPUnit para hacer tests. Me costó un poco configurarlo pero al final funcionó.
-- 2026-01-28: Escribí tests unitarios para las validaciones, en total 28.
-- 2026-01-28: También hice tests de integración para probar la API completa, 18 más.
-- 2026-01-28: Todos los tests pasan (46 en total). Me quedo tranquilo de que no he roto nada.
-- 2026-01-28: Tuve problemas con la red de Docker, los contenedores no se comunicaban. Al final lo solucioné usando `network_mode: host`.
-- 2026-01-28: Por eso tuve que cambiar nginx.conf para que apunte a `127.0.0.1:9000` en vez de `php:9000`.
-- 2026-01-28: Creé un script `run-tests.sh` para ejecutar los tests facilmente.
-- 2026-01-28: Probé todo: API, tests, Docker, cliente web. Todo funciona bien, proyecto terminado.
+- 2026-01-28: Volví al proyecto, queria dejarlo mejor estructurado. Configuré composer para PSR-4
+- 2026-01-28: He separado Support.php en varias clases con namespaces, queda mas limpio asi
+- 2026-01-28: Lo mismo con Database.php -> App\Database\Connection
+- 2026-01-28: Namespaces tambien a los controllers
+- 2026-01-28: He tenido que tocar index.php para el autoloader. He puesto match en vez de tantos if
+- 2026-01-28: PHPUnit instalado, me ha costado un rato hasta que ha funcionado bien
+- 2026-01-28: Tests unitarios hechos, 28 en total para validaciones y eso
+- 2026-01-28: Tests de integracion tambien, otros 18. Asi pruebo toda la API
+- 2026-01-28: Todo pasa, 46 tests ok
+- 2026-01-28: Problema con docker, los containers no se veian entre ellos. He tenido que poner network_mode host y cambiar el nginx para que apunte a 127.0.0.1
+- 2026-01-28: Script run-tests.sh para no tener que escribir el comando entero cada vez
+- 2026-01-28: Verificado todo, funciona

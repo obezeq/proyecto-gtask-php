@@ -17,18 +17,17 @@
 - [x] Definir endpoints/acciones sin UI (p. ej. JSON) además de HTML simple.
 - [x] Levantar Docker y probar endpoints `/api` (registro/login/tareas).
 
-## Mejoras PHP Moderno (Completadas 2026-01-28)
-- [x] Configurar Composer con autoloading PSR-4.
-- [x] Refactorizar Support.php en clases separadas con namespaces (App\Support\*).
-- [x] Refactorizar Database.php a App\Database\Connection.
-- [x] Agregar namespaces a Controllers (App\Controllers\*).
-- [x] Actualizar router con autoloading y match expressions.
-- [x] Configurar PHPUnit para testing.
-- [x] Implementar tests unitarios (28 tests).
-- [x] Implementar tests de integración (18 tests).
-- [x] Configurar Docker para testing (run-tests.sh, docker-compose.test.yml).
-- [x] Cambiar a network_mode: host para resolver problemas de red Docker.
-- [x] Verificación completa del proyecto.
+## Mejoras (28 enero)
+- [x] Composer PSR-4
+- [x] Support.php separado en clases
+- [x] Database.php con namespace
+- [x] Namespaces en controllers
+- [x] Router con match
+- [x] PHPUnit
+- [x] Tests unitarios
+- [x] Tests integracion
+- [x] Script para tests
+- [x] Arreglar red docker (network_mode host)
 
-## Estado Final
-Ya está todo hecho. El proyecto funciona correctamente y los tests pasan.
+## Estado
+Hecho, todo funciona y los tests pasan.
