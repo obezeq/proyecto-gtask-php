@@ -1,0 +1,40 @@
+services:
+  php-test:
+    build:
+      context: .
+    container_name: php-test-container
+    volumes:
+      - ./app:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+    environment:
+      DB_HOST: db-test
+      DB_PORT: 5432
+      DB_NAME: app_test
+      DB_USER: user
+      DB_PASSWORD: password
+    depends_on:
+      db-test:
+        condition: service_healthy
+    networks:
+      - test-network
+
+  db-test:
+    image: postgres:17
+    container_name: postgres-test-container
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app_test
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d app_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  test-network:
+    driver: bridge
