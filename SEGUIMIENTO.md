@@ -25,16 +25,16 @@
 - 2026-01-26: Añadí checklist de entrega en `CHECKLIST_ENTREGA.md`.
 - 2026-01-26: Añadí manual de usuario (`MANUAL_USUARIO.md`) y manual de despliegue (`MANUAL_DESPLIEGUE.md`).
 
-- 2026-01-28: Configuré Composer con autoloading PSR-4 para `App\` y `Tests\`.
-- 2026-01-28: Refactoricé `Support.php` en clases separadas con namespaces: `App\Support\Response`, `App\Support\Request`, `App\Support\Auth`, `App\Support\Cors`.
-- 2026-01-28: Refactoricé `Database.php` a `App\Database\Connection` con namespace PSR-4.
-- 2026-01-28: Agregué namespaces a Controllers (`App\Controllers\AuthController`, `App\Controllers\TaskController`).
-- 2026-01-28: Actualicé `index.php` con autoloading de Composer y match expressions para routing.
-- 2026-01-28: Configuré PHPUnit 11 con `phpunit.xml` y estructura de tests.
-- 2026-01-28: Implementé 28 tests unitarios para validaciones de auth y tareas.
-- 2026-01-28: Implementé 18 tests de integración para API de auth y tareas.
-- 2026-01-28: Total: 46 tests, 118 assertions - todos pasan.
-- 2026-01-28: Cambié a `network_mode: host` en Docker para resolver problemas de red entre contenedores.
-- 2026-01-28: Actualicé `nginx.conf` para usar `127.0.0.1:9000` en lugar de `php:9000`.
-- 2026-01-28: Creé `run-tests.sh` y `docker-compose.test.yml` para ejecutar tests en Docker.
-- 2026-01-28: Verificación completa: API, tests, Docker, cliente web - todo funcionando al 100%.
+- 2026-01-28: Retomé el proyecto. Quería mejorar la estructura asi que configuré Composer con autoloading PSR-4.
+- 2026-01-28: Separé el archivo `Support.php` en varias clases, cada una con su namespace. Quedó mucho mas organizado.
+- 2026-01-28: Hice lo mismo con `Database.php`, ahora está en `App\Database\Connection`.
+- 2026-01-28: Añadí namespaces a los controllers para que todo siga el mismo patron.
+- 2026-01-28: Tuve que actualizar el `index.php` para que use el autoloader de Composer. Aproveché para usar match en vez de if/else.
+- 2026-01-28: Instalé PHPUnit para hacer tests. Me costó un poco configurarlo pero al final funcionó.
+- 2026-01-28: Escribí tests unitarios para las validaciones, en total 28.
+- 2026-01-28: También hice tests de integración para probar la API completa, 18 más.
+- 2026-01-28: Todos los tests pasan (46 en total). Me quedo tranquilo de que no he roto nada.
+- 2026-01-28: Tuve problemas con la red de Docker, los contenedores no se comunicaban. Al final lo solucioné usando `network_mode: host`.
+- 2026-01-28: Por eso tuve que cambiar nginx.conf para que apunte a `127.0.0.1:9000` en vez de `php:9000`.
+- 2026-01-28: Creé un script `run-tests.sh` para ejecutar los tests facilmente.
+- 2026-01-28: Probé todo: API, tests, Docker, cliente web. Todo funciona bien, proyecto terminado.

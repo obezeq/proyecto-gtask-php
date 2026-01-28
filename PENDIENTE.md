@@ -31,4 +31,4 @@
 - [x] Verificación completa del proyecto.
 
 ## Estado Final
-Todas las tareas completadas. Proyecto funcional al 100%.
+Ya está todo hecho. El proyecto funciona correctamente y los tests pasan.

@@ -1,8 +1,8 @@
 # Estructura del proyecto GTask
 
-Este proyecto es una API REST en PHP 8.4 con PostgreSQL 17, empaquetada en Docker.
-Utiliza autoloading PSR-4 con Composer y namespaces para una organizacion moderna del codigo.
-Incluye un cliente web basico y tests con PHPUnit.
+He organizado el proyecto como una API REST en PHP 8.4 con PostgreSQL 17, todo corriendo en Docker.
+Uso autoloading PSR-4 con Composer y namespaces para tener el codigo bien organizado.
+También he añadido un cliente web basico y tests con PHPUnit.
 
 ## Raiz del proyecto
 - Dockerfile: construye la imagen PHP con extensiones pdo_pgsql, pgsql y Composer.
@@ -70,6 +70,5 @@ Configuracion de PHPUnit con suites Unit y Feature.
 - Los controladores leen esos campos y los validan antes de ejecutar SQL.
 
 ## Tests
-- 46 tests en total (28 unitarios + 18 de integracion)
-- 118 assertions
-- Ejecutar con: `./run-tests.sh` o `docker exec php-container ./vendor/bin/phpunit`
+He escrito 46 tests en total: 28 unitarios y 18 de integración.
+Para ejecutarlos uso `./run-tests.sh` o directamente `docker exec php-container ./vendor/bin/phpunit`.
